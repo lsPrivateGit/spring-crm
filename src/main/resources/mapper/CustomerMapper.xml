@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itcast.ssm.mapper.CustomerMapper">
+	
+	
+	<!--抽取公共的sql片段 -->
+	<sql id="query_sql_customer">
+		<where>
+		 	<if test="custName!=null and custName!=''">
+		 	   AND c.cust_name LIKE '%${custName}%'   
+		 	</if>
+		 	<if test="custSource!=null and custSource!=''">
+		 	   AND c.cust_source=#{custSource}   
+		 	</if>
+		 	<if test="custIndustry!=null and custIndustry!=''">
+		 	   AND c.cust_industry=#{custIndustry}  
+		 	</if>
+		 	<if test="custLevel!=null and custLevel!=''">
+		 	   AND c.cust_level=#{custLevel} 
+		 	</if>
+		 </where>    
+	</sql>
+	
+	
+	<select id="getCustomerByQueryVo" parameterType="queryvo" resultType="customer">
+		SELECT  
+		    c.cust_id,
+	        c.cust_name,
+	        b.dict_item_name as cust_source,
+	        d.dict_item_name as cust_industry,
+	        e.dict_item_name as cust_level,
+	        c.cust_phone,
+	        c.cust_mobile
+		 FROM customer c LEFT JOIN base_dict b ON c.cust_source=b.dict_id
+		                 LEFT JOIN base_dict d ON c.cust_industry=d.dict_id
+		                 LEFT JOIN base_dict e ON c.cust_level=e.dict_id	
+		 <include refid="query_sql_customer"/>        
+		 LIMIT #{start} ,#{rows}	
+		
+	</select>
+	
+	<select id="getCount" parameterType="queryvo" resultType="int">
+		
+		SELECT  
+		   count(1)
+		 FROM customer c LEFT JOIN base_dict b ON c.cust_source=b.dict_id
+		                 LEFT JOIN base_dict d ON c.cust_industry=d.dict_id
+		                 LEFT JOIN base_dict e ON c.cust_level=e.dict_id	
+		 <include refid="query_sql_customer"/>                      
+	</select>
+	
+	
+	
+</mapper>
